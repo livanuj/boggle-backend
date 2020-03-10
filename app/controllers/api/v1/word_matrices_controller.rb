@@ -6,8 +6,39 @@ module Api
                 render json: {status:'SUCCESS', message:"Loaded word matrices", payload: word_matrices}, status: :ok
             end
 
+            def show
+                word_matrix = WordMatrix.find(params[:id])
+                render json: {status:'SUCCESS', message:"Loaded word matrix",payload:word_matrix}, status: :ok           
+            end
+
             def create
-                word_matrix
+                word_matrix = WordMatrix.new(wmatrix_params)
+
+                if word_matrix.save
+                    render json: {status:'SUCCESS', message:"Saved word matrix", payload: word_matrix}, status: :ok
+                else
+                    render json: {status:'ERROR', message:"Word Matrix not saved" payload: word_matrix.errors}, status: :unprocessable_entity    
+                end
+            end
+
+            private def wmatrix_params
+                params.permit(:matrix_value)
+            end
+
+            def destroy
+                word_matrix = WordMatrix.find(params[:id])
+                word_matrix.destroy
+                render json: {status:'SUCCESS', message:"Deleted word matrix", payload: word_matrix}, status: :ok
+            end
+
+            def update
+                word_matrix = WordMatrix.find(params[:id])
+
+                if word_matrix.update_attributes(wmatrix_params)
+                  render json: {status:'SUCCESS', message:"Updated word matrix", payload: word_matrix}, status: :ok
+                else
+                  render json: {status:'ERROR', message:"Word matrix not updated", payload: word_matrix.errors}, status: :unprocessable_entity
+                end
             end
         end
     end    

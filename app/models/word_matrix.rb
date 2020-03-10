@@ -1,3 +1,3 @@
 class WordMatrix < ApplicationRecord
-    validates :name , presence: true
+    validates :matrix_value , presence: true
 end
