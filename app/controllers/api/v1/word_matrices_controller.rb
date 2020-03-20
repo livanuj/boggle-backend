@@ -25,7 +25,7 @@ module Api
                 params.permit(:matrix_value)
             end
 
-            def destroy
+            def destroy 
                 word_matrix = WordMatrix.find(params[:id])
                 word_matrix.destroy
                 render json: {status:'SUCCESS', message:'Deleted word matrix', payload: word_matrix}, status: :ok
@@ -41,27 +41,13 @@ module Api
                 end
             end
 
-            def getMatrixData
-                matrix_data = MatrixValidWord.where(word_matrices_id: 1)
-                matrix_data = generateWordMatrix(16)
-                render json: {status:'SUCCESS', message:'Matrix data loaded', payload: matrix_data}, status: :ok
-            end
-
-            private def generateWordMatrix(length)
-                charset = Array('A'..'Z')
-                Array.new(length) { charset.sample }.join
-            end
-
-            private def findValidWordsFromMatrixData
-                random_matrix_data = generateWordMatrix(4)
-
-            end
-
-            private def isValidWord(word)
-
-            end
+            # def getMatrixData
+            #     matrix_data = MatrixValidWord.where(word_matrices_id: 1)
+            #     #matrix_data = generateWordMatrix(16)
+            #     matrix_data = 'generateWordMatrix(16)'
+            #     render json: {status:'SUCCESS', message:'Matrix data loaded', payload: matrix_data}, status: :ok
+            # end        
 
         end
     end    
 end
-
