@@ -4,36 +4,30 @@ module Api
             
             def findValidWordsFromMatrixData
                 matrix_size = 4
-                random_matrix_data = generateWordMatrix(matrix_size,false)
-                random_matrix_data_state = generateWordMatrix(matrix_size,true)
+                random_matrix_data = generateWordMatrix('ONORCGFNNOTTNRIA',matrix_size,false)
+                random_matrix_data_state = generateWordMatrix('ONORCGFNNOTTNRIA',matrix_size,true)
 
                 word = 'ONO'
-                response = boggle_search(random_matrix_data,random_matrix_data_state,word,0,matrix_size,matrix_size,'',-1,-1,0)
-                validity = (response === 'found')?validity = isValidWordDictionaryAPI(word):'invalid_'                
-                render json: {msg: validity}, status: :ok
+                # response = boggle_search(random_matrix_data,random_matrix_data_state,word,0,matrix_size,matrix_size,'',-1,-1,0)
+                # validity = (response === 'found')?validity = isValidWordDictionaryAPI(word):'invalid_'                
+                render json: {msg: random_matrix_data}, status: :ok
             end
 
-            private def generateWordMatrix(matrix_size,state_matrix = true)
-                charset = Array('A'..'Z')
-                #word = Array.new(length) { charset.sample }.join
-                #word_array = word.split(//)
-                word_arr=[]
+            private def generateWordMatrix(word,matrix_size,state_matrix = true)
+                
+                matrix_arr=[]
                 if state_matrix
-                    for i in 1..matrix_size do
-                      word = Array.new(matrix_size) {'N'}.join
-                      word_arr[i-1] = word.split(//)
+                    for i in 0..(matrix_size-1) do
+                      matrix = Array.new(matrix_size) {'N'}.join
+                      matrix_arr[i] = matrix.split(//)
                     end                   
                 else
-                    word_arr[0] = 'ONOR'.split(//)
-                    word_arr[1] = 'CGFN'.split(//)
-                    word_arr[2] = 'NOTT'.split(//)
-                    word_arr[3] = 'NRIA'.split(//)
-                    # for i in 1..matrix_size do
-                    #     word = Array.new(matrix_size) {charset.sample}.join
-                    #     word_arr[i-1] = word.split(//)
-                    # end 
+                    for i in 0..(matrix_size-1) do
+                        matrix = word[matrix_size*i,matrix_size]
+                        matrix_arr[i] = matrix.split(//)
+                    end 
                 end
-                return word_arr
+                return matrix_arr
             end
 
             private def boggle_search(fgrid,fgrid_state,word,word_char_index,row,col,latest_word_found,prev_found_row,prev_found_col,char_location)
@@ -78,7 +72,7 @@ module Api
                         end
                     end
 
-                    if ((latest_word_found[latest_word_found.length - 1, latest_word_found.length] === latest_word_found[latest_word_found.length - 2, latest_word_found.length-1]) && ([0,(row-1)].include? prev_found_row) && ( [0,(col-1)].include? prev_found_col))
+                    if ((latest_word_found[latest_word_found.length - 1, 1] === latest_word_found[latest_word_found.length - 2, 1]) && ([0,(row-1)].include? prev_found_row) && ( [0,(col-1)].include? prev_found_col))
                             for d in 0..(direction.length-1)
                                 next_element_row = prev_found_row+ direction[d][0];
                                 next_element_col = prev_found_col + direction[d][1];

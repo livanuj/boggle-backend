@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   namespace 'api' do
     namespace 'v1' do
       resources :word_matrices do
-          # get 'findValidWordsFromMatrixData' , on: :collection
+          get 'getMatrixData' , on: :collection
       end
       resources :matrix_valid_words   
       post 'boggle/findValidWordsFromMatrixData', to: 'boggle#findValidWordsFromMatrixData'

@@ -41,12 +41,18 @@ module Api
                 end
             end
 
-            # def getMatrixData
-            #     matrix_data = MatrixValidWord.where(word_matrices_id: 1)
-            #     #matrix_data = generateWordMatrix(16)
-            #     matrix_data = 'generateWordMatrix(16)'
-            #     render json: {status:'SUCCESS', message:'Matrix data loaded', payload: matrix_data}, status: :ok
-            # end        
+            def getMatrixData
+                matrix_data = MatrixValidWord.where(word_matrices_id: 1)
+                matrix_data = generateRandomWord(16)                
+                render json: {status:'SUCCESS', message:'matrix data loaded', payload: matrix_data}, status: :ok
+            end       
+
+            private def generateRandomWord(length)
+                return 'ONORCGFNNOTTNRIA'
+                charset = Array('A'..'Z')
+                word = Array.new(length) { charset.sample }.join
+                return word
+            end
 
         end
     end    
