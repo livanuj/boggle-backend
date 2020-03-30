@@ -13,18 +13,18 @@
 ActiveRecord::Schema.define(version: 2020_03_10_140903) do
 
   create_table "matrix_valid_words", options: "ENGINE=MyISAM DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "word"
+    t.string "word", limit: 30
     t.integer "length"
     t.integer "point"
-    t.integer "rarity"
-    t.bigint "word_matrices_id"
+    t.string "puzzle_instance", limit: 15
+    t.bigint "word_matrix_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["word_matrices_id"], name: "index_matrix_valid_words_on_word_matrices_id"
+    t.index ["word_matrix_id"], name: "index_matrix_valid_words_on_word_matrix_id"
   end
 
   create_table "word_matrices", options: "ENGINE=MyISAM DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "matrix_value"
+    t.string "matrix_value", limit: 16
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

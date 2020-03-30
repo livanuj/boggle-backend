@@ -2,18 +2,55 @@ module Api
     module V1
         class BoggleController < ApplicationController
             
-            def findValidWordsFromMatrixData
-                matrix_size = 4
-                random_matrix_data = generateWordMatrix('ONORCGFNNOTTNRIA',matrix_size,false)
-                random_matrix_data_state = generateWordMatrix('ONORCGFNNOTTNRIA',matrix_size,true)
+            def findValidWordsFromMatrixData                
+                begin
+                    # render json: {status: 'ERROR', message: params[:matrix]}, status: :ok
+                    word_to_valid = (params[:word])?(params[:word]).delete(' '):''
+                    matrix_id = (params[:matrix_id])?params[:matrix_id] :''
+                    matrix_value = (params[:matrix_value])?params[:matrix_value] :''
+                    matrix_size = params[:size]?params[:size] :''
+                    puzzle_instance = params[:puzzle_instance]?params[:puzzle_instance] :''
 
-                word = 'ONO'
-                # response = boggle_search(random_matrix_data,random_matrix_data_state,word,0,matrix_size,matrix_size,'',-1,-1,0)
-                # validity = (response === 'found')?validity = isValidWordDictionaryAPI(word):'invalid_'                
-                render json: {msg: random_matrix_data}, status: :ok
+                    if word_to_valid.length < 3
+                        render json: {status: 'ERROR', message: 'Less than 3 characters.'}, status: :ok
+                    end
+
+                    if(word_to_valid  === '' || matrix_value === '' || matrix_size ==='' || matrix_id ==='' || puzzle_instance ==='')
+                        render json: {status: 'ERROR', message: 'Not a valid request'}, status: :ok
+                    end
+                    
+                    matrix_data = generateWordMatrixArray(matrix_value,matrix_size,false)
+                    matrix_data_state = generateWordMatrixArray(matrix_value,matrix_size,true)
+
+                    response = boggle_search(matrix_data,matrix_data_state,word_to_valid,0,matrix_size,matrix_size,'',-1,-1,0)
+                    validity_status = (response === 'found')?isValidWordDictionaryAPI(word_to_valid): 'invalid'
+                    
+                    payload = ''
+
+                    if(validity_status === 'valid')
+                        payload = { 
+                            word: word_to_valid, 
+                            length: word_to_valid.length,
+                            point: word_to_valid.length, 
+                            word_matrix_id: matrix_id,
+                            puzzle_instance: puzzle_instance
+                        }
+                        MatrixValidWord.create(payload)
+                    end
+                    
+                    render json: {status: 'SUCCESS', message: validity_status.capitalize()+' word', payload:payload,validity: validity_status}, status: :ok
+                rescue
+                    render json: {status: 'ERROR', message: 'Exception occured', payload:'',validity: 'invalid'}, status: :ok
+                end
             end
 
-            private def generateWordMatrix(word,matrix_size,state_matrix = true)
+            private
+
+            def getScoreByLength(length)
+                return (length > 7) ? 11 : (length === 7) ? 5 : (length === 6 ) ? 3 : (length ===5)?2: (length < 5 && length > 2) ? 1 :0
+            end
+
+            def generateWordMatrixArray(matrix,matrix_size,state_matrix = true)
                 
                 matrix_arr=[]
                 if state_matrix
@@ -23,14 +60,14 @@ module Api
                     end                   
                 else
                     for i in 0..(matrix_size-1) do
-                        matrix = word[matrix_size*i,matrix_size]
-                        matrix_arr[i] = matrix.split(//)
+                        matrix_s = matrix[matrix_size*i,matrix_size]
+                        matrix_arr[i] = matrix_s.split(//)
                     end 
                 end
                 return matrix_arr
             end
 
-            private def boggle_search(fgrid,fgrid_state,word,word_char_index,row,col,latest_word_found,prev_found_row,prev_found_col,char_location)
+            def boggle_search(fgrid,fgrid_state,word,word_char_index,row,col,latest_word_found,prev_found_row,prev_found_col,char_location)
 
                 v_word_arr = word.split(//)
 
@@ -126,7 +163,7 @@ module Api
                 return 'not_found'                
             end
 
-            private def getCharsLocations(fgrid,row,col,charc)
+            def getCharsLocations(fgrid,row,col,charc)
                 v_word_indexes = [];
                 for j in 0..(row-1)
                     for k in 0..(col-1)
@@ -138,7 +175,7 @@ module Api
 				return v_word_indexes;
             end
 
-            private def isValidWordDictionaryAPI(word)
+            def isValidWordDictionaryAPI(word)
                 api_key='dict.1.1.20200318T060530Z.d2bde6eef6075177.6f925999c467501a558dcabfaf27e01df29ad718'
                 api_link='https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key='+api_key+'&lang=en-en'
                 text = '&text='+word
