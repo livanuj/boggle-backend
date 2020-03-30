@@ -12,11 +12,13 @@ module Api
                     puzzle_instance = params[:puzzle_instance]?params[:puzzle_instance] :''
 
                     if word_to_valid.length < 3
-                        render json: {status: 'ERROR', message: 'Less than 3 characters.'}, status: :ok
+                        render json: {status: 'ERROR', message: 'Must be 3 or more char.'}, status: :ok
+                        return
                     end
 
                     if(word_to_valid  === '' || matrix_value === '' || matrix_size ==='' || matrix_id ==='' || puzzle_instance ==='')
                         render json: {status: 'ERROR', message: 'Not a valid request'}, status: :ok
+                        return
                     end
                     
                     matrix_data = generateWordMatrixArray(matrix_value,matrix_size,false)
@@ -39,8 +41,8 @@ module Api
                     end
                     
                     render json: {status: 'SUCCESS', message: validity_status.capitalize()+' word', payload:payload,validity: validity_status}, status: :ok
-                rescue
-                    render json: {status: 'ERROR', message: 'Exception occured', payload:'',validity: 'invalid'}, status: :ok
+                rescue => exception
+                    render json: {status: 'ERROR', message: 'Exception occured', payload: exception, validity: 'invalid'}, status: :ok
                 end
             end
 
