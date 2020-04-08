@@ -1,7 +1,7 @@
 module Api
     module V1
         class BoggleController < ApplicationController
-            
+
             def findValidWordsFromMatrixData                
                 begin
                     # render json: {status: 'ERROR', message: params[:matrix]}, status: :ok
@@ -12,7 +12,7 @@ module Api
                     puzzle_instance = params[:puzzle_instance]?params[:puzzle_instance] :''
 
                     if word_to_valid.length < 3
-                        render json: {status: 'ERROR', message: 'Must be 3 or more char.'}, status: :ok
+                        render json: {status: 'ERROR', message: 'Must be 3 or more char'}, status: :ok
                         return
                     end
 
@@ -24,10 +24,12 @@ module Api
                     matrix_data = generateWordMatrixArray(matrix_value,matrix_size,false)
                     matrix_data_state = generateWordMatrixArray(matrix_value,matrix_size,true)
 
-                    response = boggle_search(matrix_data,matrix_data_state,word_to_valid,0,matrix_size,matrix_size,'',-1,-1,0)
+                    response = boggle_search(matrix_data,matrix_data_state,word_to_valid,0,matrix_size,'',nil,nil)
+
                     validity_status = (response === 'found')?isValidWordDictionaryAPI(word_to_valid): 'invalid'
                     
                     payload = ''
+                    message = (response === 'found') ? 'Found but Invalid.' : 'Invalid word.'
 
                     if(validity_status === 'valid')
                         payload = { 
@@ -40,7 +42,7 @@ module Api
                         MatrixValidWord.create(payload)
                     end
                     
-                    render json: {status: 'SUCCESS', message: validity_status.capitalize()+' word', payload:payload,validity: validity_status}, status: :ok
+                    render json: {status: 'SUCCESS', message: message, payload: payload, validity: validity_status}, status: :ok
                 rescue => exception
                     render json: {status: 'ERROR', message: 'Exception occured', payload: exception, validity: 'invalid'}, status: :ok
                 end
@@ -69,100 +71,68 @@ module Api
                 return matrix_arr
             end
 
-            def boggle_search(fgrid,fgrid_state,word,word_char_index,row,col,latest_word_found,prev_found_row,prev_found_col,char_location)
-
-                v_word_arr = word.split(//)
-
-                if(v_word_arr.length > (row*col))
-                    return 'chars_exceeded'
-                end
-
-                if (word.length === latest_word_found.length && word === latest_word_found)
+            def boggle_search(fgrid, fgrid_state, word, char_index, m_size, latest_word_found, lwf_index, false_index)
+                
+                if (latest_word_found === word)
                     return 'found'
                 end
+        
+                if (word.length > m_size * m_size) 
+                    return 'char_exceeded'
+                end
+        
+                char_location_array = getCharsLocations(fgrid, m_size, m_size, word[latest_word_found.length])
 
-                v_word = ''
-                v_whole_word = ''
+                if(char_location_array === 0)
+                    return 'not_found'
+                end
+        
+                if (lwf_index != nil)
+        
+                    current_pos = [lwf_index[lwf_index.length - 1][0], lwf_index[lwf_index.length - 1][1]]
+        
+                    charExists = isCharExistInAnyDirections(fgrid, fgrid_state, m_size, word[latest_word_found.length], current_pos)
+        
+                    if (charExists != nil)
+                        fgrid_state[charExists[0]][charExists[1]] = 'Y'
+                        latest_word_found = latest_word_found + word[latest_word_found.length]
+                        lwf_index.push(charExists)
+                        return boggle_search(fgrid, fgrid_state, word, latest_word_found.length, m_size, latest_word_found, lwf_index, nil)
+                    end
+        
+                    false_index = (false_index === nil) ? [] : false_index
+                    false_index.push(current_pos)
+                    lwf_index.pop()
+                    latest_word_found = latest_word_found[0, latest_word_found.length - 1]
+                    lwf_index = (lwf_index.length == 0) ? nil : lwf_index
+                    char_index = (lwf_index == nil) ? char_index : latest_word_found.length
+                    return boggle_search(fgrid, fgrid_state, word, char_index, m_size, latest_word_found, lwf_index, false_index)
+        
+                end
+        
+                for i in char_index..(char_location_array.length-1)
 
-                direction = [
-                    [1,0],[1,1],[0,1],[-1,1],
-                    [-1,0],[-1,-1],[0,-1],[1,-1]
-                ];
+                    if (fgrid_state[char_location_array[i][0]][char_location_array[i][1]] != 'Y') 
 
-                v_word_arr_length = v_word_arr.length
-                v_word = v_word_arr[word_char_index]
-                
-                #check chars location one at time
-                v_word_indexes = getCharsLocations(fgrid,row,col,v_word)
+                        charExists = isCharExistInAnyDirections(fgrid, fgrid_state, m_size, word[latest_word_found.length + 1], char_location_array[i])
+        
+                        if (charExists != nil)
 
-                if (prev_found_row > -1 && prev_found_col > -1) #pre_index_found_start
-                    for d in 0..(direction.length-1)
-                        next_element_row = prev_found_row+ direction[d][0]
-                        next_element_col = prev_found_col + direction[d][1]
-
-                        if(next_element_row < 0 || next_element_col < 0 || next_element_row > (row-1) || next_element_col > (col-1))
-                            d='invalid_direction'                                           
-                        else
-                            if (v_word_arr[word_char_index+1] === fgrid[next_element_row][next_element_col] && fgrid_state[next_element_row][next_element_col]!= 'Y')
-                                fgrid_state[next_element_row][next_element_col] = 'Y'
-                                latest_word_found = latest_word_found + v_word_arr[word_char_index+1] 
-                                return boggle_search(fgrid,fgrid_state,word,word_char_index+1,row,col,latest_word_found,next_element_row,next_element_col,char_location)
-                            end
+                            fgrid_state[char_location_array[i][0]][char_location_array[i][1]] = 'Y'
+                            lwf_index = []
+                            lwf_index.push([char_location_array[i][0], char_location_array[i][1]])
+                            lwf_index.push(charExists)
+        
+                            fgrid_state[charExists[0]][charExists[1]] = 'Y'
+        
+                            latest_word_found = fgrid[char_location_array[i][0]][char_location_array[i][1]] + word[latest_word_found.length + 1]
+        
+                            return boggle_search(fgrid, fgrid_state, word, char_index + 1, m_size, latest_word_found, lwf_index, nil)
                         end
-                    end
-
-                    if ((latest_word_found[latest_word_found.length - 1, 1] === latest_word_found[latest_word_found.length - 2, 1]) && ([0,(row-1)].include? prev_found_row) && ( [0,(col-1)].include? prev_found_col))
-                            for d in 0..(direction.length-1)
-                                next_element_row = prev_found_row+ direction[d][0];
-                                next_element_col = prev_found_col + direction[d][1];
-
-                                if (next_element_row < 0 || next_element_col < 0 || next_element_row > (row-1) || next_element_col > (col-1))
-                                    d='invalid_direction'
-                                else
-                                    if (fgrid[next_element_row][next_element_col] === fgrid[prev_found_row][prev_found_col])
-                                        fgrid_state[next_element_row][next_element_col] = 'N'
-                                    end
-                                end
-                            end
-
-                            latest_word_found = latest_word_found.substring(0, latest_word_found.length - 1)					
-                            return boggle_search(fgrid,fgrid_state,word,word_char_index-1,row,col,latest_word_found,prev_found_row ,prev_found_col,char_location)
-                    else
-                        fgrid_state[prev_found_row][prev_found_col] = 'N'
-                        latest_word_found = latest_word_found[0, latest_word_found.length - 1]
-                        return boggle_search(fgrid,fgrid_state,word,word_char_index-1,row,col,latest_word_found,-1,-1,char_location)
-                    end
-                end #pre_index_found_end
-               
-                #check directions_from_initial_chars for_start
-                chr = char_location
-                for chr in 0..(v_word_indexes.length-1)
-                    if(fgrid_state[v_word_indexes[chr][:row]][v_word_indexes[chr][:col]] !='Y')		
-
-                        fgrid_state[v_word_indexes[chr][:row]][v_word_indexes[chr][:col]] = 'Y'
-
-                        for d in 0..(direction.length-1) #start for
-
-                            next_element_row = v_word_indexes[chr][:row] + direction[d][0]
-                            next_element_col = v_word_indexes[chr][:col] + direction[d][1]
-
-                            if (next_element_row < 0 || next_element_col < 0 || next_element_row > (row-1) || next_element_col > (col-1))
-                                d='invalid_direction'
-                            else
-
-                                if (v_word_arr[word_char_index+1] === fgrid[next_element_row][next_element_col])
-
-                                    fgrid_state[next_element_row][next_element_col] = 'Y'
-                                    latest_word_found = v_word_arr[word_char_index] + v_word_arr[word_char_index+1]
-                                    return boggle_search(fgrid,fgrid_state,word,word_char_index+1,row,col,latest_word_found,next_element_row,next_element_col,char_location+1)
-                                end
-                            end 
-                        end #end for
-                    end
-                    char_location = char_location + 1
-                end #check directions_from_initial_chars for_end
-
-                return 'not_found'                
+                    end        
+                end
+                
+                return 'not_found'
             end
 
             def getCharsLocations(fgrid,row,col,charc)
@@ -170,11 +140,29 @@ module Api
                 for j in 0..(row-1)
                     for k in 0..(col-1)
                         if fgrid[j][k] === charc
-                            v_word_indexes.push({"row": j, "col":k})
+                            v_word_indexes.push([j,k])
                         end
                     end
                 end
 				return v_word_indexes;
+            end
+
+            def isCharExistInAnyDirections(fgrid, fgrid_state, m_size, char_to_find, current_char_location)
+                direction = [
+                [1, 0], [1, 1], [0, 1], [-1, 1],
+                [-1, 0], [-1, -1], [0, -1], [1, -1]
+                ];
+
+                for d in 0..direction.length-1
+                    next_element_row = current_char_location[0] + direction[d][0]
+                    next_element_col = current_char_location[1] + direction[d][1]
+
+                    if (next_element_row >= 0 && next_element_col >= 0 && next_element_row <= (m_size - 1) && next_element_col <= (m_size - 1) && 
+                        fgrid[next_element_row][next_element_col] === char_to_find && fgrid_state[next_element_row][next_element_col] != 'Y') 
+                        return [next_element_row, next_element_col]
+                    end                    
+                end
+                return nil
             end
 
             def isValidWordDictionaryAPI(word)
