@@ -5,7 +5,6 @@ Rails.application.routes.draw do
       post 'word_matrices/getMatrixData', to: 'word_matrices#getMatrixData'
       post 'matrix_valid_words/getPuzzleStats', to: 'matrix_valid_words#getPuzzleStats'
       post 'boggle/findValidWordsFromMatrixData', to: 'boggle#findValidWordsFromMatrixData'
-      get 'boggle/testMe', to: 'boggle#testMe'
     end
   end
 end

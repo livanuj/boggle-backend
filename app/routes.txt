@@ -1,5 +1,5 @@
-1. Getting random matrix string (POST)
-	http://localhost:3000/api/v1/word_matrices/getMatrixData
+1. Getting random puzzle matrix (POST)
+	http://localhost:3002/api/v1/word_matrices/getMatrixData
 	
 	post params
 	{
@@ -8,18 +8,18 @@
 
 2. Validating word in matrix with yandex dictionary (POST)
 
-	http://localhost:3000/api/v1/boggle/findValidWordsFromMatrixData
+	http://localhost:3002/api/v1/boggle/findValidWordsFromMatrixData
 		
 	post params
 	{
-	"matrix_value": "ABCDEFGHIJKLMNOP",
+	"matrix_value": "AB2DEFGHIJKLMNOP",
 	"matrix_id": 1,
 	"puzzle_instance": 'crafbae4nz3isoc',
 	"size": 4,
 	"word": 'ABC'
 	}
 
-3.http://localhost:3000/api/v1/matrix_valid_words/getPuzzleStats (POST)
+3.http://localhost:3002/api/v1/matrix_valid_words/getPuzzleStats (POST)
 
 	post params
 	{

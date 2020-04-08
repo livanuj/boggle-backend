@@ -51,7 +51,6 @@ module Api
 
             private 
             def generateRandomWord(length, alphaNum)
-                # return 'ONORCGFNNOTTNRIA'
                 charset = alphaNum ? Array('0'..'9') + Array('a'..'z') : Array('A'..'Z')
                 word = Array.new(length) { charset.sample }.join
                 return word
