@@ -40,7 +40,8 @@ NOTE:
 API LINK INFO:
 
 1. Getting random puzzle matrix (POST)
-	http://localhost:3002/api/v1/word_matrices/getMatrixData
+	
+    - http://localhost:3002/api/v1/word_matrices/getMatrixData
 	
 	post params
 	{
@@ -49,19 +50,20 @@ API LINK INFO:
 
 2. Validating word in matrix with yandex dictionary (POST)
 
-	http://localhost:3002/api/v1/boggle/findValidWordsFromMatrixData
+	- http://localhost:3002/api/v1/boggle/findValidWordsFromMatrixData
 		
 	post params
 	{
-	"matrix_value": "AB2DEFGHIJKLMNOP",
+	"matrix_value": "ABCDEFGHIJKLMNOP",
 	"matrix_id": 1,
-	"puzzle_instance": 'crafbae4nz3isoc',
+	"puzzle_instance": "crafbae4nz3isoc",
 	"size": 4,
-	"word": 'ABC'
+	"word": "ABC"
 	}
 
 3.  To get the past puzzle statistics
-    http://localhost:3002/api/v1/matrix_valid_words/getPuzzleStats (POST)
+
+    - http://localhost:3002/api/v1/matrix_valid_words/getPuzzleStats (POST)
 
 	post params
 	{
