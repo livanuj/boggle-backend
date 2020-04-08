@@ -60,7 +60,8 @@ API LINK INFO:
 	"word": 'ABC'
 	}
 
-3.http://localhost:3002/api/v1/matrix_valid_words/getPuzzleStats (POST)
+3.  To get the past puzzle statistics
+    http://localhost:3002/api/v1/matrix_valid_words/getPuzzleStats (POST)
 
 	post params
 	{
