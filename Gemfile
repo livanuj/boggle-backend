@@ -5,8 +5,7 @@ ruby '2.6.5'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.2', '>= 6.0.2.1'
-# Use mysql as the database for Active Record
-gem 'mysql2', '>= 0.4.4'
+
 # Use Puma as the app server
 gem 'puma', '~> 4.1'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -42,3 +41,10 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem 'rack-cors'
 
+group:production do
+  gem 'pg'
+  gem 'rails_12factor','0.0.2'
+end
+
+# Use mysql as the database for Active Record
+gem 'mysql2', '>= 0.4.4'
