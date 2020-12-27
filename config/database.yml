@@ -49,10 +49,10 @@ development:
 #
 production:
   <<: *default
-  adapter: postgresql
-  encoding: unicode
-  database: d92uktkdsfobvv
-  username: kcbnrzoysmtgkv
-  password: 8ae62aead91bd6d3c7b1a0ab2d50ba61d876932325124bade365c624d96dd48a
-  host: ec2-54-225-214-37.compute-1.amazonaws.com
-  port: 5432
+  # adapter: postgresql
+  # encoding: unicode
+  database: <%= ENV['DATABASE_URL'] %>
+  # username: kcbnrzoysmtgkv
+  # password: 8ae62aead91bd6d3c7b1a0ab2d50ba61d876932325124bade365c624d96dd48a
+  # host: ec2-54-225-214-37.compute-1.amazonaws.com
+  # port: 5432
