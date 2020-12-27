@@ -22,11 +22,14 @@ module Api
 
                     #FOR TEST
                     word_matrix = WordMatrix.all.sample
-                    if(word_matrix == nil)
+                    if word_matrix.nil?
                         # From predefined list from existing game : easier to find words
                         matrix_data = generateWordFromPredefinedGame()
-                        for i in 0..matrix_data.length-1
-                            WordMatrix.create({matrix_value: matrix_data[i]})  
+#                         for i in 0..matrix_data.length-1
+#                             WordMatrix.create({matrix_value: matrix_data[i]})  
+#                         end
+                        matrix_data.each do |md|
+                          WordMatrix.create(matrix_value: md)
                         end
                     end
                     boggle_value = 'existing'         
